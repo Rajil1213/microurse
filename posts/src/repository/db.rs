@@ -16,11 +16,8 @@ impl Db {
         post
     }
 
-    pub fn find_by_id(&self, id: &str) -> &Post {
-        match self.posts.get(id) {
-            Some(p) => p,
-            None => panic!("Post with id {id} not found"),
-        }
+    pub fn find_by_id(&self, id: &str) -> Option<&Post> {
+        self.posts.get(id)
     }
 
     pub fn fetch_all(&self) -> Vec<&Post> {
