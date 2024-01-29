@@ -1,41 +1,15 @@
-/** @type { import("eslint").Linter.Config } */
+/* eslint-env node */
+require("@rushstack/eslint-patch/modern-module-resolution");
+
 module.exports = {
   root: true,
   extends: [
+    "plugin:vue/vue3-essential",
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:svelte/recommended",
-    "prettier",
+    "@vue/eslint-config-typescript",
+    "@vue/eslint-config-prettier/skip-formatting",
   ],
-  parser: "@typescript-eslint/parser",
-  plugins: ["@typescript-eslint"],
   parserOptions: {
-    sourceType: "module",
-    ecmaVersion: 2020,
-    extraFileExtensions: [".svelte"],
+    ecmaVersion: "latest",
   },
-  env: {
-    browser: true,
-    es2017: true,
-    node: true,
-  },
-  overrides: [
-    {
-      files: ["*.svelte"],
-      parser: "svelte-eslint-parser",
-      parserOptions: {
-        parser: "@typescript-eslint/parser",
-      },
-    },
-    {
-      files: ["*.svelte", "*.js", "*.ts", "*.cjs"],
-      parser: "prettier",
-      rules: {
-        useTabs: false,
-        singleQuote: false,
-        trailingComma: "all",
-        printWidth: 100,
-      },
-    },
-  ],
 };
