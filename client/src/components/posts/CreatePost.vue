@@ -6,27 +6,22 @@
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
-    <div v-if="!!feedback.status" class="feedback-container">
-      <div class="feedback-message"
-        :class="{ 'feedback-success': feedback.status === 'success', 'feedback-error': feedback.status === 'error' }">
-        <p>{{ feedback.message }}
-        </p>
-        <button @click="clearFeedback">x</button>
-      </div>
-    </div>
+    <FeedbackContainer :feedback="feedback" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { shallowReactive, ref } from "vue";
 import axios from "axios";
+import FeedbackContainer from "../FeedbackContainer.vue";
+import type { Feedback } from "../FeedbackContainer.vue";
 
 interface PostData {
   title: string;
 }
 
 const formData = shallowReactive<PostData>({ title: "" });
-const feedback = ref<{ status: "error" | "success" | null, message: string }>({ status: null, message: "" });
+const feedback = ref<Feedback>({ status: null, message: "" });
 
 const createPost = async () => {
   try {
@@ -42,10 +37,6 @@ const createPost = async () => {
     console.log(ex);
     feedback.value = { status: "error", message: "Something went wrong" };
   }
-};
-
-const clearFeedback = () => {
-  feedback.value = { status: null, message: "" };
 };
 </script>
 
@@ -66,27 +57,4 @@ form button[type="submit"] {
   @apply text-center justify-center;
 }
         
-.feedback-container {
-  @apply my-4 p-2 w-full text-center justify-center flex;
-}
-        
-.feedback-message {
-  @apply w-fit rounded-lg p-2 px-4;
-}
-
-.feedback-success {
-  @apply bg-teal-400;
-}
-
-.feedback-error {
-  @apply bg-red-300;
-}
-
-.feedback-message * {
-  @apply inline-block
-}
-        
-.feedback-message button {
-  @apply mx-2;
-}
 </style>
