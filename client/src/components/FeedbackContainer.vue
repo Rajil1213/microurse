@@ -1,7 +1,6 @@
 <template>
   <div v-if="showFeedback" class="feedback-container">
-    <div class="feedback-message"
-      :class="{ 'feedback-success': feedback.status === 'success', 'feedback-error': feedback.status === 'error' }">
+    <div class="feedback-message" :class="{ 'feedback-success': !isError, 'feedback-error': isError }">
       <p>{{ feedback.message }}
       </p>
       <button @click="clearFeedback">x</button>
@@ -17,9 +16,11 @@ export interface Feedback {
 </script>
 
 <script setup lang="ts">
-import { watch, ref } from "vue";
+import { watch, ref, computed } from "vue";
 
 const props = defineProps<{ feedback: Feedback }>();
+
+const isError = computed(() => props.feedback.status === "error");
 
 const showFeedback = ref<boolean>(props.feedback.status !== null);
 
