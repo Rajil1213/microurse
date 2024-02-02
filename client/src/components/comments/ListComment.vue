@@ -1,0 +1,74 @@
+<template>
+  <div class="text-center">
+    <FeedbackContainer :feedback="feedback" />
+    <hr class="my-5" />
+    <p v-if="noComments" class="italic text-xs m-2">No Comments</p>
+    <li class="comments-list" v-else :key="commentKey">
+      <h4 class="text-md">Comments</h4>
+      <ul v-for="comment in comments" class="comment-card" :key="comment.id">
+        <h4 class="text-sm">{{ comment.content }}</h4>
+      </ul>
+    </li>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { onMounted, ref, computed } from "vue";
+import { commentsClient } from "@/services";
+import FeedbackContainer, { type Feedback } from "../FeedbackContainer.vue";
+import { AxiosError } from "axios";
+
+interface Comment {
+  id: string;
+  content: string;
+}
+
+const { postId } = defineProps<{ postId: string }>();
+
+const comments = ref<Array<Comment>>([]);
+const feedback = ref<Feedback>({ status: null, message: "" });
+const commentKey = ref<number>(0);
+
+const fetchComments = async () => {
+  try {
+    const res = await commentsClient.get<Array<Comment>>(`/posts/${postId}/comments`);
+    if (res.status === 200) {
+      comments.value = res.data;
+    } else {
+      feedback.value = {
+        status: "error",
+        message: res.statusText
+      };
+    }
+  } catch (ex: unknown) {
+    if (!(ex instanceof AxiosError)) {
+      feedback.value = { status: "error", message: "Could not fetch comments" };
+      return;
+    }
+
+    if (ex.response && ex.response.status !== 404) {
+      feedback.value = {
+        status: "error",
+        message: ex.message
+      };
+      return;
+    }
+  }
+}
+
+onMounted(() => {
+  fetchComments();
+})
+
+const noComments = computed(() => comments.value.length === 0);
+</script>
+
+<style scoped>
+.comments-list {
+  @apply list-none m-2 my-5;
+}
+
+.comment-card {
+  @apply h-fit shadow-md bg-teal-100 p-1 m-2;
+}
+</style>

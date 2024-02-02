@@ -1,8 +1,9 @@
+
 <template>
   <div>
     <form action="post" @submit.prevent="createPost">
       <div class="form-group">
-        <input id="post-title" type="text" placeholder="Post Title" v-model="formData.title" class="form-control">
+        <input id="post-title" type="text" placeholder="Comment" v-model="formData.content" class="form-control">
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
@@ -12,26 +13,25 @@
 
 <script setup lang="ts">
 import { shallowReactive, ref } from "vue";
-import { postsClient } from "@/services";
+import { commentsClient } from "@/services";
 import FeedbackContainer from "../FeedbackContainer.vue";
 import type { Feedback } from "../FeedbackContainer.vue";
-import { POSTS_ROUTE } from "@/constants";
 
+const { postId } = defineProps<{ postId: string }>();
 const emit = defineEmits<{ (e: "create"): void }>()
 
 interface PostData {
-  title: string;
+  content: string;
 }
 
-const formData = shallowReactive<PostData>({ title: "" });
+const formData = shallowReactive<PostData>({ content: "" });
 const feedback = ref<Feedback>({ status: null, message: "" });
 
 const createPost = async () => {
   try {
-    const result = await postsClient.post(POSTS_ROUTE, formData);
+    const result = await commentsClient.post(`/posts/${postId}/comments`, formData);
 
     if (result.status === 201) {
-      feedback.value = { status: "success", message: "Post created successfully" };
       emit("create");
     } else {
       console.log(result);
@@ -54,11 +54,11 @@ form {
 }
 
 .form-control {
-  @apply border-slate-500 border-2 m-2 rounded-sm p-1 px-2 w-1/3; 
+  @apply border-slate-500 border-2 m-2 rounded-sm p-1 px-2 w-[75%] text-sm; 
 }
 
 form button[type="submit"] {
-  @apply text-center justify-center;
+  @apply text-center justify-center text-sm;
 }
         
 </style>
