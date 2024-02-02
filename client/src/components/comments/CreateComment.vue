@@ -18,7 +18,7 @@ import FeedbackContainer from "../FeedbackContainer.vue";
 import type { Feedback } from "../FeedbackContainer.vue";
 
 const { postId } = defineProps<{ postId: string }>();
-const emit = defineEmits<{ (e: "create"): void }>()
+const emit = defineEmits<{ "create": [ string ] }>()
 
 interface PostData {
   content: string;
@@ -32,7 +32,7 @@ const createPost = async () => {
     const result = await commentsClient.post(`/posts/${postId}/comments`, formData);
 
     if (result.status === 201) {
-      emit("create");
+      emit("create", postId);
     } else {
       console.log(result);
       feedback.value = { status: "error", message: "Something went wrong" };

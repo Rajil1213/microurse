@@ -3,17 +3,19 @@
     <FeedbackContainer :feedback="feedback" />
     <hr class="my-5" />
     <p v-if="noComments" class="italic text-xs m-2">No Comments</p>
-    <li class="comments-list" v-else :key="commentKey">
+    <div v-else>
       <h4 class="text-md">Comments</h4>
-      <ul v-for="comment in comments" class="comment-card" :key="comment.id">
-        <h4 class="text-sm">{{ comment.content }}</h4>
-      </ul>
-    </li>
+      <li class="comments-list" :key="commentKey">
+        <ul v-for="comment in comments" class="comment-card" :key="comment.id">
+          <h4 class="text-sm">{{ comment.content }}</h4>
+        </ul>
+      </li>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import { commentsClient } from "@/services";
 import FeedbackContainer, { type Feedback } from "../FeedbackContainer.vue";
 import { AxiosError } from "axios";
@@ -23,7 +25,7 @@ interface Comment {
   content: string;
 }
 
-const { postId } = defineProps<{ postId: string }>();
+const props = defineProps<{ postId: string, changedCommentId: string }>();
 
 const comments = ref<Array<Comment>>([]);
 const feedback = ref<Feedback>({ status: null, message: "" });
@@ -31,7 +33,7 @@ const commentKey = ref<number>(0);
 
 const fetchComments = async () => {
   try {
-    const res = await commentsClient.get<Array<Comment>>(`/posts/${postId}/comments`);
+    const res = await commentsClient.get<Array<Comment>>(`/posts/${props.postId}/comments`);
     if (res.status === 200) {
       comments.value = res.data;
     } else {
@@ -56,16 +58,23 @@ const fetchComments = async () => {
   }
 }
 
-onMounted(() => {
-  fetchComments();
+onMounted(async () => {
+  await fetchComments();
 })
+
+watch([ props ], async () => {
+  console.log("Comments for", props.changedCommentId, "changed!");
+  if (props.changedCommentId === props.postId) {
+    await fetchComments();
+  }
+});
 
 const noComments = computed(() => comments.value.length === 0);
 </script>
 
 <style scoped>
 .comments-list {
-  @apply list-none m-2 my-5;
+  @apply list-none m-2 my-5 max-h-[4rem] overflow-scroll bg-slate-300;
 }
 
 .comment-card {

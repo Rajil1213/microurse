@@ -6,7 +6,7 @@
     <div class="posts-list">
       <div v-for="post in posts" class="post-card" :key="post.id">
         <h1 class="text-lg">{{ post.title }}</h1>
-        <ListComment :postId="post.id" :key="commentKey" />
+        <ListComment :postId="post.id" :changedCommentId="changedCommentId" />
         <CreateComment :postId="post.id" @create="createCommentHandler" />
       </div>
     </div>
@@ -28,7 +28,7 @@ interface Post {
 
 const posts = ref<Array<Post>>([]);
 const feedback = ref<Feedback>({ status: null, message: "" });
-const commentKey = ref<number>(0);
+const changedCommentId = ref<string>("");
 
 const fetchPosts = async () => {
   try {
@@ -51,9 +51,10 @@ onMounted(() => {
   fetchPosts();
 })
 
-const createCommentHandler = () => {
-  commentKey.value++;
+const createCommentHandler = (id: string) => {
+  changedCommentId.value = id;
 }
+
 </script>
 
 <style scoped>
