@@ -1,6 +1,10 @@
-use axum::{http::Method, routing::get, Router};
+use axum::{
+    http::Method,
+    routing::{get, post},
+    Router,
+};
 use posts::{
-    handlers::{create, fetch},
+    handlers::{create, fetch, recv_event},
     repository::Db,
 };
 use tokio::net::TcpListener;
@@ -18,6 +22,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/posts", get(fetch).post(create))
+        .route("/events", post(recv_event))
         .with_state(Db::default())
         .layer(cors);
 
