@@ -13,24 +13,42 @@ pub struct Db {
 }
 
 impl Db {
-    pub fn add_comment(&self, post_id: &Uuid, content: &str) -> Vec<Comment> {
+    pub fn create(&self, post_id: &Uuid) -> Vec<Comment> {
         let mut comments = self.comments.write().unwrap();
-        let new_comment = Comment::new(content);
-
         let comments = comments.entry(post_id.to_string()).or_default();
-        comments.push(new_comment.clone());
 
         comments.clone()
     }
 
-    pub fn fetch_by_post_id(&self, post_id: &Uuid) -> Vec<Comment> {
+    pub fn add_comment(&self, post_id: &Uuid, content: &str) -> Result<Vec<Comment>, String> {
+        let mut comments = self.comments.write().unwrap();
+
+        if comments.get(&post_id.to_string()).is_none() {
+            return Err(format!("Post with id: {post_id} not found"));
+        }
+
+        if !content.is_empty() {
+            return Err("Comment cannot be empty".to_string());
+        }
+
+        let new_comment = Comment::new(content);
+
+        let comments = comments.entry(post_id.to_string()).or_default();
+        comments.push(new_comment);
+
+        Ok(comments.clone())
+    }
+
+    pub fn fetch_by_post_id(&self, post_id: &Uuid) -> Result<Vec<Comment>, String> {
         let posts = self.comments.read().unwrap();
 
-        // TODO: check if the post exists
+        if posts.get(&post_id.to_string()).is_none() {
+            return Err(format!("Post with id: {post_id} not found"));
+        }
 
-        posts
+        Ok(posts
             .get(&post_id.to_string())
             .unwrap_or(&Vec::new())
-            .to_vec()
+            .to_vec())
     }
 }

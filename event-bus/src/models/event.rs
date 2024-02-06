@@ -9,16 +9,21 @@ pub struct Post {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Comment {
-    pub id: Uuid,
+    id: String,
+    content: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommentEvent {
     pub post_id: Uuid,
-    pub content: String,
+    pub comments: Vec<Comment>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", content = "data")]
 pub enum Event {
     PostCreated(Post),
-    CommentCreated(Comment),
+    CommentCreated(CommentEvent),
 }
 
 #[cfg(test)]
@@ -41,14 +46,22 @@ mod tests {
 
     #[test]
     fn serializes_correctly() {
-        let event = Event::CommentCreated(Comment {
-            id: uuid::Uuid::from_str("71de1f21-ced1-4d39-a8e3-cd1ce2d12afc").unwrap(),
+        let event = Event::CommentCreated(CommentEvent {
             post_id: uuid::Uuid::from_str("71de1f21-ced1-4d39-a8e3-cd1ce2d12afc").unwrap(),
-            content: "My First Comment".to_string(),
+            comments: vec![
+                Comment {
+                    id: "71de1f21-ced1-4d39-a8e3-cd1ce2d12afc".to_string(),
+                    content: "My First Comment".to_string(),
+                },
+                Comment {
+                    id: "71de1f21-ced1-4d39-a8e3-cd1ce2d12afc".to_string(),
+                    content: "My Second Comment".to_string(),
+                },
+            ],
         });
 
         let actual: String = serde_json::to_string(&event).unwrap();
-        let expected = r#"{"type":"CommentCreated","data":{"id":"71de1f21-ced1-4d39-a8e3-cd1ce2d12afc","post_id":"71de1f21-ced1-4d39-a8e3-cd1ce2d12afc","content":"My First Comment"}}"#;
+        let expected = r#"{"type":"CommentCreated","data":{"post_id":"71de1f21-ced1-4d39-a8e3-cd1ce2d12afc","comments":[{"id":"71de1f21-ced1-4d39-a8e3-cd1ce2d12afc","content":"My First Comment"},{"id":"71de1f21-ced1-4d39-a8e3-cd1ce2d12afc","content":"My Second Comment"}]}}"#;
 
         assert_eq!(actual, expected);
     }

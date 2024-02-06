@@ -1,6 +1,10 @@
-use axum::{http::Method, routing::get, Router};
+use axum::{
+    http::Method,
+    routing::{get, post},
+    Router,
+};
 use comments::{
-    handlers::{add_comment, fetch},
+    handlers::{add_comment, fetch, recv_event},
     repository::Db,
 };
 
@@ -19,6 +23,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/posts/:postId/comments", get(fetch).post(add_comment))
+        .route("/events", post(recv_event))
         .with_state(Db::default())
         .layer(cors);
 

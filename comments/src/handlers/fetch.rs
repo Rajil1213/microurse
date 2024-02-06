@@ -8,16 +8,21 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::repository::Db;
+use crate::{models::Comment, repository::Db};
 use tracing::info;
 
-pub async fn fetch(State(db): State<Db>, Path(post_id): Path<Uuid>) -> impl IntoResponse {
+pub async fn fetch(
+    State(db): State<Db>,
+    Path(post_id): Path<Uuid>,
+) -> Result<impl IntoResponse, impl IntoResponse> {
     let start = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_nanos();
 
-    let comments = db.fetch_by_post_id(&post_id);
+    let comments = db
+        .fetch_by_post_id(&post_id)
+        .map_err(|e| (StatusCode::NOT_FOUND, e))?;
 
     let stop = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -31,5 +36,5 @@ pub async fn fetch(State(db): State<Db>, Path(post_id): Path<Uuid>) -> impl Into
         stop - start
     );
 
-    (StatusCode::OK, Json(comments))
+    Ok::<(StatusCode, Json<Vec<Comment>>), (StatusCode, String)>((StatusCode::OK, Json(comments)))
 }
