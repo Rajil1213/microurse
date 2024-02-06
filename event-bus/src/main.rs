@@ -1,5 +1,5 @@
 use axum::{http::Method, routing::post, Router};
-use event_bus::handlers::recv_event;
+use event_bus::{handlers::recv_event, models::client::ServiceClient};
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
@@ -13,7 +13,10 @@ async fn main() {
         .allow_headers(Any)
         .allow_origin(Any);
 
-    let app = Router::new().route("/events", post(recv_event)).layer(cors);
+    let app = Router::new()
+        .route("/events", post(recv_event))
+        .layer(cors)
+        .with_state(ServiceClient::default());
 
     const HOST: &str = "0.0.0.0";
     const PORT: usize = 4003;
