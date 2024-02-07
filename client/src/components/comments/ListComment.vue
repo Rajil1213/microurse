@@ -63,7 +63,6 @@ onMounted(async () => {
 })
 
 watch([ props ], async () => {
-  console.log("Comments for", props.changedCommentId, "changed!");
   if (props.changedCommentId === props.postId) {
     await fetchComments();
   }
