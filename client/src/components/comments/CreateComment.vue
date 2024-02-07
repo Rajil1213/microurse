@@ -16,6 +16,7 @@ import { shallowReactive, ref } from "vue";
 import { commentsClient } from "@/services";
 import FeedbackContainer from "../FeedbackContainer.vue";
 import type { Feedback } from "../FeedbackContainer.vue";
+import { AxiosError } from "axios";
 
 const { postId } = defineProps<{ postId: string }>();
 const emit = defineEmits<{ "create": [ string ] }>()
@@ -39,7 +40,11 @@ const createPost = async () => {
     }
   } catch (ex: unknown) {
     console.log(ex);
-    feedback.value = { status: "error", message: "Something went wrong" };
+    const defaultErrorMesage = "Something went wrong";
+    if (ex instanceof AxiosError) {
+      feedback.value = { status: "error", message: ex.response?.data.message || defaultErrorMesage };
+    }
+    feedback.value = { status: "error", message: defaultErrorMesage };
   }
 };
 </script>
