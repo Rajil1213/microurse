@@ -15,9 +15,9 @@ pub struct ServiceClient {
 impl Default for ServiceClient {
     fn default() -> Self {
         let base_url = "http://localhost";
-        let posts_url = format!("{base_url}:{POSTS_PORT}");
-        let comments_url = format!("{base_url}:{COMMENTS_PORT}");
-        let queries_url = format!("{base_url}:{QUERIES_PORT}");
+        let posts_url = format!("{base_url}:{POSTS_PORT}/events");
+        let comments_url = format!("{base_url}:{COMMENTS_PORT}/events");
+        let queries_url = format!("{base_url}:{QUERIES_PORT}/events");
 
         Self {
             client: reqwest::Client::new(),
