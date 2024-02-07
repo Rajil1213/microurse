@@ -38,20 +38,35 @@ pub enum ClientType {
 impl ServiceClient {
     pub async fn dispatch_to_all(&self, event: &Event) -> Result<(), String> {
         info!("Dispatching to posts client");
-        self.client
+        let posts_response = self
+            .client
             .post(&self.posts_url)
             .json(event)
             .send()
             .await
+            .map_err(|e| e.to_string())?
+            .text()
+            .await
             .map_err(|e| e.to_string())?;
 
+        info!("Dispatched posts event successfully: {:?}", posts_response);
+
         info!("Dispatching to comments client");
-        self.client
+        let comments_response = self
+            .client
             .post(&self.comments_url)
             .json(event)
             .send()
             .await
+            .map_err(|e| e.to_string())?
+            .text()
+            .await
             .map_err(|e| e.to_string())?;
+
+        info!(
+            "Dispatched comments event successfully: {:?}",
+            comments_response
+        );
 
         info!("Dispatching to queries client");
         self.client
