@@ -32,7 +32,7 @@ async fn main() {
     let addr: &str = &format!("{}:{}", HOST, PORT);
     let tcp_listener = TcpListener::bind(addr).await.unwrap();
 
-    info!("Starting Posts Service at {}", addr);
+    info!("Starting Comments Service at {}", addr);
 
     axum::serve(tcp_listener, app).await.unwrap();
 }
