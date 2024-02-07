@@ -36,45 +36,6 @@ pub enum ClientType {
 }
 
 impl ServiceClient {
-    pub async fn dispatch(
-        &self,
-        client_type: ClientType,
-        event: &Event,
-    ) -> Result<reqwest::Response, String> {
-        match client_type {
-            ClientType::Post => {
-                info!("Dispatching to posts client");
-
-                self.client
-                    .post(&self.posts_url)
-                    .json(event)
-                    .send()
-                    .await
-                    .map_err(|e| e.to_string())
-            }
-            ClientType::Comment => {
-                info!("Dispatching to posts client");
-
-                self.client
-                    .post(&self.comments_url)
-                    .json(event)
-                    .send()
-                    .await
-                    .map_err(|e| e.to_string())
-            }
-            ClientType::Query => {
-                info!("Dispatching to queries client");
-
-                self.client
-                    .post(&self.queries_url)
-                    .json(event)
-                    .send()
-                    .await
-                    .map_err(|e| e.to_string())
-            }
-        }
-    }
-
     pub async fn dispatch_to_all(&self, event: &Event) -> Result<(), String> {
         info!("Dispatching to posts client");
         self.client
