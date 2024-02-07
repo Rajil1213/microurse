@@ -3,6 +3,7 @@ use std::{
     sync::{Arc, RwLock},
 };
 
+use tracing::info;
 use uuid::Uuid;
 
 use crate::models::Comment;
@@ -13,11 +14,12 @@ pub struct Db {
 }
 
 impl Db {
-    pub fn create(&self, post_id: &Uuid) -> Vec<Comment> {
+    pub fn create<'u>(&self, post_id: &'u Uuid) -> &'u Uuid {
+        info!("Initializing comments for post_id: {post_id:?}");
         let mut comments = self.comments.write().unwrap();
-        let comments = comments.entry(post_id.to_string()).or_default();
+        comments.entry(post_id.to_string()).or_default();
 
-        comments.clone()
+        post_id
     }
 
     pub fn add_comment(&self, post_id: &Uuid, content: &str) -> Result<Vec<Comment>, String> {
@@ -27,7 +29,7 @@ impl Db {
             return Err(format!("Post with id: {post_id} not found"));
         }
 
-        if !content.is_empty() {
+        if content.is_empty() {
             return Err("Comment cannot be empty".to_string());
         }
 

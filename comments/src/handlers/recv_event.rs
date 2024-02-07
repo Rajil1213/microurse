@@ -8,9 +8,15 @@ pub async fn recv_event(
 ) -> Result<impl IntoResponse, ()> {
     match event {
         Event::PostCreated(p) => {
-            db.create(&p.id);
-            Ok((StatusCode::OK, "Post Event received successfully"))
+            let post_id = db.create(&p.id);
+            Ok((
+                StatusCode::OK,
+                format!("Post Event for {post_id} received successfully"),
+            ))
         }
-        Event::CommentCreated(_) => Ok((StatusCode::OK, "Comment Event received successfully")),
+        Event::CommentCreated(_) => Ok((
+            StatusCode::OK,
+            "Comment Event received successfully".to_string(),
+        )),
     }
 }
