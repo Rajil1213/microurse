@@ -62,8 +62,10 @@ onMounted(async () => {
   await fetchComments();
 })
 
-watch([ props ], async () => {
-  if (props.changedCommentId === props.postId) {
+watch(() => props.changedCommentId, async () => {
+  const id = props.changedCommentId.split("|")[ 0 ]; // the second part is a random value
+
+  if (id === props.postId) {
     await fetchComments();
   }
 });

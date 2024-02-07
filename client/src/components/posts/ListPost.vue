@@ -52,7 +52,7 @@ onMounted(() => {
 })
 
 const createCommentHandler = (id: string) => {
-  changedCommentId.value = id;
+  changedCommentId.value = `${id}|${new Date().getTime()}`;
 }
 
 </script>
