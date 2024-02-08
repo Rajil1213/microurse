@@ -14,20 +14,22 @@
   </div>
 </template>
 
+<script lang="ts">
+export interface Comment {
+  id: string;
+  content: string;
+}
+</script>
+
 <script setup lang="ts">
-import { onMounted, ref, computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { commentsClient } from "@/services";
 import FeedbackContainer, { type Feedback } from "../FeedbackContainer.vue";
 import { AxiosError } from "axios";
 
-interface Comment {
-  id: string;
-  content: string;
-}
+const props = defineProps<{ comments: Array<Comment>, postId: string, changedCommentId: string }>();
 
-const props = defineProps<{ postId: string, changedCommentId: string }>();
-
-const comments = ref<Array<Comment>>([]);
+const comments = ref<Array<Comment>>(props.comments);
 const feedback = ref<Feedback>({ status: null, message: "" });
 const commentKey = ref<number>(0);
 
@@ -57,10 +59,6 @@ const fetchComments = async () => {
     }
   }
 }
-
-onMounted(async () => {
-  await fetchComments();
-})
 
 watch(() => props.changedCommentId, async () => {
   const id = props.changedCommentId.split("|")[ 0 ]; // the second part is a random value

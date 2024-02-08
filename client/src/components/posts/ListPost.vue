@@ -4,10 +4,10 @@
     <hr class="my-5" />
     <FeedbackContainer :feedback="feedback" />
     <div class="posts-list">
-      <div v-for="post in posts" class="post-card" :key="post.id">
-        <h1 class="text-lg">{{ post.title }}</h1>
-        <ListComment :postId="post.id" :changedCommentId="changedCommentId" />
-        <CreateComment :postId="post.id" @create="createCommentHandler" />
+      <div v-for="postComment in postComments" class="post-card" :key="postComment.id">
+        <h1 class="text-lg">{{ postComment.post }}</h1>
+        <ListComment :comments="postComment.comments" :postId="postComment.id" :changedCommentId="changedCommentId" />
+        <CreateComment :postId="postComment.id" @create="createCommentHandler" />
       </div>
     </div>
   </div>
@@ -15,26 +15,28 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import { POSTS_ROUTE } from "@/constants";
-import { postsClient } from "@/services";
+import { QUERY_ROUTE } from "@/constants";
+import { queryClient } from "@/services";
 import FeedbackContainer, { type Feedback } from "../FeedbackContainer.vue";
-import ListComment from "../comments/ListComment.vue";
-import CreateComment from "../comments/CreateComment.vue";
+import ListComment from "@/components/comments/ListComment.vue";
+import CreateComment from "@/components/comments/CreateComment.vue";
+import type { Comment } from "@/components/comments/ListComment.vue";
 
-interface Post {
+interface PostComments {
   id: string;
-  title: string;
+  post: string;
+  comments: Array<Comment>;
 }
 
-const posts = ref<Array<Post>>([]);
+const postComments = ref<Array<PostComments>>([]);
 const feedback = ref<Feedback>({ status: null, message: "" });
 const changedCommentId = ref<string>("");
 
 const fetchPosts = async () => {
   try {
-    const res = await postsClient.get<Array<Post>>(POSTS_ROUTE);
+    const res = await queryClient.get<Array<PostComments>>(QUERY_ROUTE);
     if (res.status === 200) {
-      posts.value = res.data;
+      postComments.value = res.data;
     } else {
       feedback.value = {
         status: "error",
