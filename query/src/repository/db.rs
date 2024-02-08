@@ -23,13 +23,14 @@ impl Db {
             .id
     }
 
-    pub fn fetch(&self, post_id: &Uuid) -> Result<PostComment> {
+    pub fn fetch(&self) -> Vec<PostComment> {
         let post_comments = self.post_comments.read().unwrap();
 
         post_comments
-            .get(post_id)
-            .with_context(|| format!("Post with id: {:?} not found", post_id))
-            .cloned()
+            .values()
+            .into_iter()
+            .map(|v| v.clone())
+            .collect::<Vec<PostComment>>()
     }
 
     pub fn update(&self, post_id: &Uuid, comments: &[Comment]) -> Result<()> {
