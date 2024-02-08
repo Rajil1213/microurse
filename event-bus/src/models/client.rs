@@ -69,12 +69,21 @@ impl ServiceClient {
         );
 
         info!("Dispatching to queries client");
-        self.client
+        let query_response = self
+            .client
             .post(&self.queries_url)
             .json(event)
             .send()
             .await
+            .map_err(|e| e.to_string())?
+            .text()
+            .await
             .map_err(|e| e.to_string())?;
+
+        info!(
+            "Dispatched queries event successfully: {:?}",
+            query_response
+        );
 
         Ok(())
     }
