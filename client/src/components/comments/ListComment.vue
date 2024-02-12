@@ -7,7 +7,7 @@
       <h4 class="text-md">Comments</h4>
       <li class="comments-list" :key="commentKey">
         <ul v-for="comment in comments" class="comment-card" :key="comment.id">
-          <h4 class="text-sm">{{ comment.content }}</h4>
+          <h4 class="text-sm" :class="statusToColor(comment.status)">{{ moderatedComment(comment) }}</h4>
         </ul>
       </li>
     </div>
@@ -18,6 +18,7 @@
 export interface Comment {
   id: string;
   content: string;
+  status: "approved" | "pending" | "rejected";
 }
 </script>
 
@@ -69,6 +70,30 @@ watch(() => props.changedCommentId, async () => {
 });
 
 const noComments = computed(() => comments.value.length === 0);
+
+const statusToColor = (status: Comment[ "status" ]): string => {
+  switch (status) {
+    case "approved":
+      return "bg-green-200";
+    case "pending":
+      return "bg-yellow-200";
+    case "rejected":
+      return "bg-red-200";
+  }
+}
+
+const moderatedComment = (comment: Comment): string => {
+  const { status, content } = comment;
+
+  switch (status) {
+    case "approved":
+      return content;
+    case "pending":
+      return "<awaiting approval>";
+    case "rejected":
+      return "[censored]"
+  }
+}
 </script>
 
 <style scoped>
