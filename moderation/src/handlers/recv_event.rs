@@ -46,7 +46,7 @@ async fn dispatch(event: &CommentModeratedEvent) -> Result<()> {
 
     reqwest::Client::new()
         .post(EVENT_BUS_URL)
-        .json(event)
+        .json(&Event::CommentModerated(event.clone()))
         .send()
         .await?;
 
