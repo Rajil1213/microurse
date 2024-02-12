@@ -1,7 +1,7 @@
 use reqwest;
 use tracing::info;
 
-use crate::constants::{COMMENTS_PORT, POSTS_PORT, QUERIES_PORT};
+use crate::constants::{COMMENTS_PORT, MODERATION_PORT, POSTS_PORT, QUERIES_PORT};
 use crate::models::event::Event;
 
 #[derive(Debug, Clone)]
@@ -10,6 +10,7 @@ pub struct ServiceClient {
     posts_url: String,
     comments_url: String,
     queries_url: String,
+    moderation_url: String,
 }
 
 impl Default for ServiceClient {
@@ -18,12 +19,14 @@ impl Default for ServiceClient {
         let posts_url = format!("{base_url}:{POSTS_PORT}/events");
         let comments_url = format!("{base_url}:{COMMENTS_PORT}/events");
         let queries_url = format!("{base_url}:{QUERIES_PORT}/events");
+        let moderation_url = format!("{base_url}:{MODERATION_PORT}/events");
 
         Self {
             client: reqwest::Client::new(),
             posts_url,
             comments_url,
             queries_url,
+            moderation_url,
         }
     }
 }
@@ -82,6 +85,23 @@ impl ServiceClient {
 
         info!(
             "Dispatched queries event successfully: {:?}",
+            query_response
+        );
+
+        info!("Dispatching to moderator client");
+        let query_response = self
+            .client
+            .post(&self.moderation_url)
+            .json(event)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?
+            .text()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        info!(
+            "Dispatched to moderator event successfully: {:?}",
             query_response
         );
 
