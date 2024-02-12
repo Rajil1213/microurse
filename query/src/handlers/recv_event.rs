@@ -1,5 +1,5 @@
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use tracing::info;
+use tracing::{error, info};
 
 use crate::{models::Event, repository::Db};
 
@@ -26,7 +26,7 @@ pub async fn recv_event(
                 Ok(_) => Ok((
                     StatusCode::OK,
                     format!(
-                        "Updated comments on post with id {} successfully",
+                        "Created comments on post with id {} successfully",
                         c.post_id
                     ),
                 )),
@@ -44,7 +44,10 @@ pub async fn recv_event(
                         c.post_id
                     ),
                 )),
-                Err(err) => Err((StatusCode::NOT_FOUND, err.to_string())),
+                Err(err) => {
+                    error!("Comment not found");
+                    Err((StatusCode::NOT_FOUND, err.to_string()))
+                }
             }
         }
         _ => Ok((StatusCode::OK, "Unhandled event ignored".to_string())),
