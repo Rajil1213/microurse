@@ -3,7 +3,7 @@
 This branch contains a simple Microservice for creating and commenting on posts
 built during the Microservices Course by Stephen Grider on [Udemy](https://www.udemy.com/course/microservices-with-node-js-and-react/).
 While the original course uses NodeJS and React for its projects, this repository
-will have their equivalent architecture and functionality in Rust and Vue. All
+has their equivalent architecture and functionality in Rust and Vue. All
 services use an in-memory database (using a HashMap).
 
 ## Services
