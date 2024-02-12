@@ -1,4 +1,4 @@
-# Microurse
+# Blog
 
 This branch contains a simple Microservice for creating and commenting on posts
 built during the Microservices Course by Stephen Grider on [Udemy](https://www.udemy.com/course/microservices-with-node-js-and-react/).
