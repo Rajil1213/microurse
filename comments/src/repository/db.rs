@@ -85,6 +85,10 @@ impl Db {
             ));
         }
 
+        info!(
+            "Moderating comment with id: {}",
+            moderation_event.comment_id
+        );
         let comment_to_moderate = comment_to_moderate.unwrap();
         comment_to_moderate.status = moderation_event.status.clone();
 
