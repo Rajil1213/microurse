@@ -1,10 +1,10 @@
 use std::{
     collections::HashMap,
-    sync::{Arc, RwLock},
+    sync::{Arc, RwLock, RwLockWriteGuard},
 };
 
 use anyhow::{Context, Result};
-use tracing::warn;
+use tracing::info;
 use uuid::Uuid;
 
 use crate::models::{Comment, Post, PostComment};
@@ -29,15 +29,14 @@ impl Db {
 
         post_comments
             .values()
-            .into_iter()
-            .map(|v| v.clone())
+            .cloned()
             .collect::<Vec<PostComment>>()
     }
 
     pub fn set(&self, post_id: &Uuid, comments: &[Comment]) -> Result<()> {
         let mut post_comments = self.post_comments.write().unwrap();
 
-        self.find_by_post_id(post_id)?;
+        Self::find_by_post_id(&post_comments, post_id)?;
 
         post_comments
             .entry(post_id.to_owned())
@@ -47,32 +46,40 @@ impl Db {
     }
 
     pub fn update(&self, post_id: &Uuid, comment: &Comment) -> Result<()> {
+        info!(
+            "Updating comment with id: {} for post with id: {}",
+            comment.id, post_id
+        );
         let mut post_comments = self.post_comments.write().unwrap();
 
-        self.find_by_post_id(post_id)?;
+        Self::find_by_post_id(&post_comments, post_id)?;
 
         post_comments.entry(post_id.to_owned()).and_modify(|pc| {
-            let mut comment_to_update = pc.comments.iter_mut().find(|c| c.id == comment.id);
+            pc.comments = pc
+                .comments
+                .iter()
+                .map(|c| {
+                    if c.id == comment.id {
+                        return comment;
+                    }
 
-            match comment_to_update {
-                Some(mut c) => c = &mut comment.clone(),
-                None => {
-                    warn!(
-                        "Could not find comment with id {} to update, doing nothing",
-                        comment.id
-                    );
-                }
-            }
+                    c
+                })
+                .cloned()
+                .collect::<Vec<Comment>>();
         });
 
         Ok(())
     }
 
-    fn find_by_post_id(&self, post_id: &Uuid) -> Result<&PostComment> {
-        let post_comments = self.post_comments.read().unwrap();
-
+    fn find_by_post_id(
+        post_comments: &RwLockWriteGuard<HashMap<Uuid, PostComment>>,
+        post_id: &Uuid,
+    ) -> Result<()> {
         post_comments
             .get(post_id)
-            .with_context(|| format!("Post with id: {post_id:?} not found"))
+            .with_context(|| format!("Post with id: {post_id:?} not found"))?;
+
+        Ok(())
     }
 }
