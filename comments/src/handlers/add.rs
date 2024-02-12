@@ -9,7 +9,7 @@ use uuid::Uuid;
 use crate::{
     constants::EVENT_BUS_URL,
     dtos::NewCommentInput,
-    models::{CommentEvent, Event},
+    models::{CommentCreatedEvent, Event},
     repository::Db,
 };
 use tracing::info;
@@ -25,10 +25,10 @@ pub async fn add_comment(
 
     info!("Commenting on post with id: {}", post_id);
 
-    let event = Event::CommentCreated(CommentEvent {
+    let event = CommentCreatedEvent {
         post_id,
         comments: comments.clone(),
-    });
+    };
 
     match dispatch_event(&event).await {
         Ok(()) => Ok((StatusCode::CREATED, Json(comments))),
@@ -36,7 +36,7 @@ pub async fn add_comment(
     }
 }
 
-pub async fn dispatch_event(event: &Event) -> Result<(), String> {
+pub async fn dispatch_event(event: &CommentCreatedEvent) -> Result<(), String> {
     info!("Dispatching comment creation event");
 
     reqwest::Client::new()

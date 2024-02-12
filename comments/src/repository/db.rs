@@ -6,7 +6,7 @@ use std::{
 use tracing::info;
 use uuid::Uuid;
 
-use crate::models::Comment;
+use crate::models::{Comment, CommentModeratedEvent};
 
 #[derive(Clone, Debug, Default)]
 pub struct Db {
@@ -52,5 +52,42 @@ impl Db {
             .get(&post_id.to_string())
             .unwrap_or(&Vec::new())
             .to_vec())
+    }
+
+    pub fn moderate_comment(
+        &self,
+        moderation_event: &CommentModeratedEvent,
+    ) -> Result<Comment, String> {
+        info!("Fetching comment by id: {}", moderation_event.comment_id);
+
+        let mut comments = self.comments.write().unwrap();
+
+        if comments
+            .get(&moderation_event.post_id.to_string())
+            .is_none()
+        {
+            return Err(format!(
+                "Post with id: {} not found, could not moderate",
+                moderation_event.post_id
+            ));
+        }
+
+        let comment_to_moderate = comments
+            .get_mut(&moderation_event.post_id.to_string())
+            .unwrap()
+            .iter_mut()
+            .find(|c| c.id == moderation_event.comment_id);
+
+        if comment_to_moderate.is_none() {
+            return Err(format!(
+                "Comment with id: {} not found in post with id: {}",
+                moderation_event.comment_id, moderation_event.post_id
+            ));
+        }
+
+        let comment_to_moderate = comment_to_moderate.unwrap();
+        comment_to_moderate.status = moderation_event.status.clone();
+
+        Ok(comment_to_moderate.clone())
     }
 }
