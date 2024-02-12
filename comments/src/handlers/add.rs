@@ -12,7 +12,7 @@ use crate::{
     models::{CommentCreatedEvent, Event},
     repository::Db,
 };
-use tracing::info;
+use tracing::{error, info};
 
 pub async fn add_comment(
     State(db): State<Db>,
@@ -25,10 +25,10 @@ pub async fn add_comment(
 
     info!("Commenting on post with id: {}", post_id);
 
-    let event = CommentCreatedEvent {
+    let event = Event::CommentCreated(CommentCreatedEvent {
         post_id,
         comments: comments.clone(),
-    };
+    });
 
     match dispatch_event(&event).await {
         Ok(()) => Ok((StatusCode::CREATED, Json(comments))),
@@ -36,7 +36,7 @@ pub async fn add_comment(
     }
 }
 
-pub async fn dispatch_event(event: &CommentCreatedEvent) -> Result<(), String> {
+pub async fn dispatch_event(event: &Event) -> Result<(), String> {
     info!("Dispatching comment creation event");
 
     reqwest::Client::new()
@@ -44,7 +44,13 @@ pub async fn dispatch_event(event: &CommentCreatedEvent) -> Result<(), String> {
         .json(event)
         .send()
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| {
+            error!(
+                "Could not dispatch comment creation event due to: {}",
+                e.to_string()
+            );
+            e.to_string()
+        })?;
 
     Ok(())
 }

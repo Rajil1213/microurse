@@ -57,7 +57,7 @@ async fn dispatch_update_event(event: &CommentUpdatedEvent) -> Result<(), String
 
     reqwest::Client::new()
         .post(EVENT_BUS_URL)
-        .json(event)
+        .json(&Event::CommentUpdated(event.clone()))
         .send()
         .await
         .map_err(|e| e.to_string())?;
