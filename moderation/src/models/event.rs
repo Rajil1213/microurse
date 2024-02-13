@@ -1,4 +1,7 @@
+use std::{thread, time};
+
 use serde::{Deserialize, Serialize};
+use tracing::info;
 use uuid::Uuid;
 
 use crate::constants::BLACKLISTED_WORDS;
@@ -45,7 +48,13 @@ pub struct Comment {
 }
 
 impl Comment {
+    const MODERATOR_THINKING_TIME: u64 = 1000; // 1 sec
+
     pub fn check(&self) -> CommentStatus {
+        info!("Checking if comment contains blacklisted words");
+
+        thread::sleep(time::Duration::from_millis(Self::MODERATOR_THINKING_TIME));
+
         for blacklisted_word in BLACKLISTED_WORDS {
             if self.content.to_lowercase().contains(blacklisted_word) {
                 return CommentStatus::Rejected;
