@@ -46,12 +46,16 @@ pub enum Event {
 
 impl Event {
     pub async fn load() -> Result<Vec<Event>> {
-        let events: Vec<Event> = reqwest::get(EVENT_BUS_URL)
-            .await
-            .context("failed to get request from event bus")?
-            .json()
-            .await
-            .context("failed to parse events from event bus")?;
+        let events: Vec<Event> = match reqwest::get(EVENT_BUS_URL).await {
+            Ok(res) => res
+                .json()
+                .await
+                .context("failed to parse events from event bus")?,
+            Err(e) => {
+                format!("could not contact event bus, setting db to empty, {}", e);
+                Vec::new()
+            }
+        };
 
         info!("Fetched events: {:?}", events);
 
