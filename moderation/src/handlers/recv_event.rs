@@ -1,6 +1,9 @@
+use core::time;
+use std::thread;
+
 use anyhow::Result;
 use axum::{http::StatusCode, response::IntoResponse, Json};
-use tracing::info;
+use tracing::{error, info};
 
 use crate::{
     constants::EVENT_BUS_URL,
@@ -8,6 +11,8 @@ use crate::{
 };
 
 pub async fn recv_event(Json(event): Json<Event>) -> Result<impl IntoResponse, impl IntoResponse> {
+    const MODERATOR_THINKING_TIME: u64 = 1000; // 1 sec
+
     match event {
         Event::CommentCreated(created_comments) => {
             info!("Received CommentCreated Event, starting moderation...");
@@ -16,15 +21,25 @@ pub async fn recv_event(Json(event): Json<Event>) -> Result<impl IntoResponse, i
                 match comment.status {
                     CommentStatus::Pending => {
                         let status = comment.check();
-                        dispatch(&CommentModeratedEvent {
-                            post_id: created_comments.post_id,
-                            status,
-                            comment_id: comment.id,
-                        })
-                        .await
-                        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+                        thread::spawn(move || {
+                            thread::sleep(time::Duration::from_millis(MODERATOR_THINKING_TIME));
 
-                        return Ok((StatusCode::OK, "comment moderated".to_string()));
+                            dispatch(&CommentModeratedEvent {
+                                post_id: created_comments.post_id,
+                                status,
+                                comment_id: comment.id,
+                            })
+                            .unwrap_or_else(|e| {
+                                error!(
+                                    "Could not dispatch moderation event due to: {}",
+                                    e.to_string()
+                                );
+                            });
+                        });
+                        return Ok((
+                            StatusCode::OK,
+                            "comment scheduled for moderation".to_string(),
+                        ));
                     }
                     _ => continue,
                 }
@@ -41,14 +56,15 @@ pub async fn recv_event(Json(event): Json<Event>) -> Result<impl IntoResponse, i
     }
 }
 
-async fn dispatch(event: &CommentModeratedEvent) -> Result<()> {
+fn dispatch(event: &CommentModeratedEvent) -> Result<()> {
     info!("Dispatching comment moderated event");
 
-    reqwest::Client::new()
+    let res = reqwest::blocking::Client::new()
         .post(EVENT_BUS_URL)
         .json(&Event::CommentModerated(event.clone()))
-        .send()
-        .await?;
+        .send()?
+        .text()?;
 
+    info!("Dispatched event successfully: {}", res);
     Ok(())
 }
