@@ -71,22 +71,18 @@ impl ServiceClient {
             comments_response
         );
 
+        // queries service can recover from errors by ingesting from the event bus
+        // even if this service fails, others should not
         info!("Dispatching to queries client");
-        let query_response = self
-            .client
-            .post(&self.queries_url)
-            .json(event)
-            .send()
-            .await
-            .map_err(|e| e.to_string())?
-            .text()
-            .await
-            .map_err(|e| e.to_string())?;
+        let query_response = match self.client.post(&self.queries_url).json(event).send().await {
+            Ok(res) => res
+                .text()
+                .await
+                .map_err(|e| format!("could not parse response from query client: {}", e))?,
+            Err(_) => "could not contact queries client".to_string(),
+        };
 
-        info!(
-            "Dispatched queries event successfully: {:?}",
-            query_response
-        );
+        info!("Dispatched queries event: {}", query_response);
 
         info!("Dispatching to moderator client");
         let query_response = self
