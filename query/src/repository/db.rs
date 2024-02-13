@@ -7,11 +7,31 @@ use anyhow::{Context, Result};
 use tracing::info;
 use uuid::Uuid;
 
-use crate::models::{Comment, Post, PostComment};
+use crate::models::{Comment, Event, Post, PostComment};
 
 #[derive(Debug, Clone, Default)]
 pub struct Db {
     post_comments: Arc<RwLock<HashMap<Uuid, PostComment>>>,
+}
+
+impl Db {
+    pub async fn new() -> Self {
+        let events = Event::load()
+            .await
+            .expect("Events must be fetched successfully upon start");
+
+        let db = Self::default();
+
+        info!("Loading events from event bus");
+        for event in events {
+            let res = event.parse(&db).expect("Must load events upon start");
+            info!("{} => {} ({})", event.variant(), res.1, res.0);
+        }
+
+        Self {
+            post_comments: db.post_comments,
+        }
+    }
 }
 
 impl Db {

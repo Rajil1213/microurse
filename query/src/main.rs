@@ -20,10 +20,12 @@ async fn main() {
         .allow_headers(Any)
         .allow_origin(Any);
 
+    let db = Db::new().await;
+
     let app = Router::new()
         .route("/posts", get(fetch))
         .route("/events", post(recv_event))
-        .with_state(Db::default())
+        .with_state(db)
         .layer(cors);
 
     const HOST: &str = "0.0.0.0";
