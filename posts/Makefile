@@ -17,3 +17,7 @@ build:
 .PHONY: release
 release:
 	cargo build --release
+
+.PHONY: deploy
+deploy:
+	docker compose up -d posts
