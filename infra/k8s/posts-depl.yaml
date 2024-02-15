@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: posts-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      # tell the Deployment to manage pods which have a label of `app` with the value `posts`
+      app: posts
+  template:
+    # the pods must have a label of `app` with the value `posts`
+    metadata:
+      labels:
+        app: posts
+    spec:
+      containers:
+        - name: posts
+          image: whitenoise1213/blog-posts
+
