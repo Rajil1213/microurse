@@ -18,6 +18,10 @@ build:
 release:
 	cargo build --release
 
+.PHONY: image
+image:
+	docker build -t whitenoise1213/blog-posts:0.0.1 .
+
 .PHONY: deploy
 deploy:
 	docker compose up -d posts
