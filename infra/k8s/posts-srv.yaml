@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: posts-srv
+spec:
+  type: NodePort
+  # select the pods to expose to the outside world via a label
+  selector:
+    app: posts
+  ports:
+    - name: posts # name of the container for readability (can be anything)
+      protocol: TCP
+      port: 4000 # the port of the NodePort service that actually receives the requests
+      targetPort: 4000 # the port on the actual application deployed in the pod
+
