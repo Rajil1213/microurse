@@ -1,9 +1,14 @@
-
 <template>
   <div>
     <form action="post" @submit.prevent="createPost">
       <div class="form-group">
-        <input id="post-title" type="text" placeholder="Comment" v-model="formData.content" class="form-control">
+        <input
+          id="post-title"
+          type="text"
+          placeholder="Comment"
+          v-model="formData.content"
+          class="form-control"
+        />
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
@@ -13,13 +18,13 @@
 
 <script setup lang="ts">
 import { shallowReactive, ref } from "vue";
-import { commentsClient } from "@/services";
+import { backendClient } from "@/services";
 import FeedbackContainer from "../FeedbackContainer.vue";
 import type { Feedback } from "../FeedbackContainer.vue";
 import { AxiosError } from "axios";
 
 const { postId } = defineProps<{ postId: string }>();
-const emit = defineEmits<{ "create": [ string ] }>()
+const emit = defineEmits<{ create: [string] }>();
 
 interface PostData {
   content: string;
@@ -30,7 +35,7 @@ const feedback = ref<Feedback>({ status: null, message: "" });
 
 const createPost = async () => {
   try {
-    const result = await commentsClient.post(`/posts/${postId}/comments`, formData);
+    const result = await backendClient.post(`/posts/${postId}/comments`, formData);
 
     if (result.status === 201) {
       emit("create", postId);
@@ -42,7 +47,10 @@ const createPost = async () => {
     console.log(ex);
     const defaultErrorMesage = "Something went wrong";
     if (ex instanceof AxiosError) {
-      feedback.value = { status: "error", message: ex.response?.data.message || defaultErrorMesage };
+      feedback.value = {
+        status: "error",
+        message: ex.response?.data.message || defaultErrorMesage,
+      };
     }
     feedback.value = { status: "error", message: defaultErrorMesage };
   }
@@ -59,11 +67,10 @@ form {
 }
 
 .form-control {
-  @apply border-slate-500 border-2 m-2 rounded-sm p-1 px-2 w-[75%] text-sm; 
+  @apply m-2 w-[75%] rounded-sm border-2 border-slate-500 p-1 px-2 text-sm;
 }
 
 form button[type="submit"] {
-  @apply text-center justify-center text-sm;
+  @apply justify-center text-center text-sm;
 }
-        
 </style>

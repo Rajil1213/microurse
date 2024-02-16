@@ -6,7 +6,11 @@
     <div class="posts-list">
       <div v-for="postComment in postComments" class="post-card" :key="postComment.id">
         <h1 class="text-lg">{{ postComment.post }}</h1>
-        <ListComment :comments="postComment.comments" :postId="postComment.id" :changedCommentId="changedCommentId" />
+        <ListComment
+          :comments="postComment.comments"
+          :postId="postComment.id"
+          :changedCommentId="changedCommentId"
+        />
         <CreateComment :postId="postComment.id" @create="createCommentHandler" />
       </div>
     </div>
@@ -16,7 +20,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { QUERY_ROUTE } from "@/constants";
-import { queryClient } from "@/services";
+import { backendClient } from "@/services";
 import FeedbackContainer, { type Feedback } from "../FeedbackContainer.vue";
 import ListComment from "@/components/comments/ListComment.vue";
 import CreateComment from "@/components/comments/CreateComment.vue";
@@ -34,37 +38,36 @@ const changedCommentId = ref<string>("");
 
 const fetchPosts = async () => {
   try {
-    const res = await queryClient.get<Array<PostComments>>(QUERY_ROUTE);
+    const res = await backendClient.get<Array<PostComments>>(QUERY_ROUTE);
     if (res.status === 200) {
       postComments.value = res.data;
     } else {
       feedback.value = {
         status: "error",
-        message: res.statusText
+        message: res.statusText,
       };
     }
   } catch (ex) {
     console.log(ex);
     feedback.value = { status: "error", message: "Could not fetch posts" };
   }
-}
+};
 
 onMounted(() => {
   fetchPosts();
-})
+});
 
 const createCommentHandler = (id: string) => {
   changedCommentId.value = `${id}|${new Date().getTime()}`;
-}
-
+};
 </script>
 
 <style scoped>
 .posts-list {
-  @apply flex justify-around w-full flex-wrap;
+  @apply flex w-full flex-wrap justify-around;
 }
 
 .post-card {
-  @apply w-[30rem] max-h-fit min-h-[10rem] shadow-md bg-teal-200 py-5 px-1 m-3;
+  @apply m-3 max-h-fit min-h-[10rem] w-[30rem] bg-teal-200 px-1 py-5 shadow-md;
 }
 </style>
