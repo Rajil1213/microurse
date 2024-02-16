@@ -20,7 +20,7 @@ release:
 
 .PHONY: image
 image:
-	docker build -t whitenoise1213/blog-posts:0.0.1 .
+	docker build -t whitenoise1213/blog-posts:latest .
 
 .PHONY: deploy
 deploy:
