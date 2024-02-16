@@ -20,7 +20,7 @@ release:
 
 .PHONY: image
 image:
-	docker build -t whitenoise1213/blog-event-bus:0.0.1 .
+	docker build -t whitenoise1213/blog-event-bus:latest .
 
 .PHONY: deploy
 deploy:

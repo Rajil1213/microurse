@@ -1,7 +1,10 @@
 use reqwest;
 use tracing::info;
 
-use crate::constants::{COMMENTS_PORT, MODERATION_PORT, POSTS_PORT, QUERIES_PORT};
+use crate::constants::{
+    COMMENTS_PORT, COMMENTS_URL, MODERATION_PORT, MODERATION_URL, POSTS_PORT, POSTS_URL,
+    QUERIES_PORT, QUERIES_URL,
+};
 use crate::models::event::Event;
 
 #[derive(Debug, Clone)]
@@ -15,11 +18,10 @@ pub struct ServiceClient {
 
 impl Default for ServiceClient {
     fn default() -> Self {
-        let base_url = "http://localhost";
-        let posts_url = format!("{base_url}:{POSTS_PORT}/events");
-        let comments_url = format!("{base_url}:{COMMENTS_PORT}/events");
-        let queries_url = format!("{base_url}:{QUERIES_PORT}/events");
-        let moderation_url = format!("{base_url}:{MODERATION_PORT}/events");
+        let posts_url = format!("{POSTS_URL}:{POSTS_PORT}/events");
+        let comments_url = format!("{COMMENTS_URL}:{COMMENTS_PORT}/events");
+        let queries_url = format!("{QUERIES_URL}:{QUERIES_PORT}/events");
+        let moderation_url = format!("{MODERATION_URL}:{MODERATION_PORT}/events");
 
         Self {
             client: reqwest::Client::new(),

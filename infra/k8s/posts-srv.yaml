@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: posts-srv
+  name: posts-nodeport-srv
 spec:
   type: NodePort
   # select the pods to expose to the outside world via a label

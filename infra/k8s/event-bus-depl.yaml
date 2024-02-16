@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-bus-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      # tell the Deployment to manage pods which have a label of `app` with the value `event-bus`
+      app: event-bus
+  template:
+    # the pods must have a label of `app` with the value `event-bus`
+    metadata:
+      labels:
+        app: event-bus
+    spec:
+      containers:
+        - name: event-bus
+          image: whitenoise1213/blog-event-bus
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-bus-srv
+spec:
+  selector:
+    app: event-bus
+  type: ClusterIP # this is the default so can be excluded
+  ports:
+    - name: event-bus
+      protocol: TCP
+      port: 4003
+      targetPort: 4003

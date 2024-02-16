@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      # tell the Deployment to manage pods which have a label of `app` with the value `comments`
+      app: comments
+  template:
+    # the pods must have a label of `app` with the value `comments`
+    metadata:
+      labels:
+        app: comments
+    spec:
+      containers:
+        - name: comments
+          image: whitenoise1213/blog-comments
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-srv
+spec:
+  selector:
+    app: comments
+  type: ClusterIP # this is the default so can be excluded
+  ports:
+    - name: comments
+      protocol: TCP
+      port: 4001
+      targetPort: 4001

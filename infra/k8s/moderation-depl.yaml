@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moderation-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      # tell the Deployment to manage pods which have a label of `app` with the value `moderation`
+      app: moderation
+  template:
+    # the pods must have a label of `app` with the value `moderation`
+    metadata:
+      labels:
+        app: moderation
+    spec:
+      containers:
+        - name: moderation
+          image: whitenoise1213/blog-moderation
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: moderation-srv
+spec:
+  selector:
+    app: moderation
+  type: ClusterIP # this is the default so can be excluded
+  ports:
+    - name: moderation
+      protocol: TCP
+      port: 4005
+      targetPort: 4005
