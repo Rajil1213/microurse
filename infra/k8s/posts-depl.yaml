@@ -24,7 +24,7 @@ metadata:
   name: posts-srv
 spec:
   selector:
-    app: posts-bus
+    app: posts
   type: ClusterIP # this is the default so can be excluded
   ports:
     - name: posts 
