@@ -21,7 +21,8 @@ async fn main() {
         .allow_origin(Any);
 
     let app = Router::new()
-        .route("/posts", get(fetch).post(create))
+        .route("/posts", get(fetch))
+        .route("/posts/new", post(create))
         .route("/events", post(recv_event))
         .with_state(Db::default())
         .layer(cors);
