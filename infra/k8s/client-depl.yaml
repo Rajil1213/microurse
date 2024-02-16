@@ -27,6 +27,7 @@ spec:
     app: client
   type: ClusterIP # this is the default so can be excluded
   ports:
+    - name: client
       protocol: TCP
       port: 4002
       targetPort: 4002
