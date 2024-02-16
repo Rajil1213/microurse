@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-srv
+spec:
+  # specify the vendor config via class name
+  ingressClassName: nginx
+  rules:
+    - host: blog.com
+      http:
+        paths:
+          - path: /posts/new
+            pathType: Prefix
+            backend:
+              service:
+                name: posts-srv
+                port:
+                  number: 4000
+          - path: /posts/(.*)/comments
+            pathType: ImplementationSpecific # for the wildcard
+            backend:
+              service:
+                name: comments-srv
+                port:
+                  number: 4001
+          - path: /posts
+            pathType: Prefix
+            backend:
+              service:
+                name: query-srv
+                port:
+                  number: 4004
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: client-srv
+                port:
+                  number: 4002
+
