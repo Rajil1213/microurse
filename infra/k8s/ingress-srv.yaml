@@ -32,8 +32,8 @@ spec:
                 name: query-srv
                 port:
                   number: 4004
-          - path: /
-            pathType: Prefix
+          - path: /(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: client-srv
